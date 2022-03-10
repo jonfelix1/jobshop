@@ -1,28 +1,38 @@
+/*
+Tugas 1 Pemodelan Simulasi
+Jon Felix Germinian/13518025
+Filbert Wijaya/13518077
+*/
+
 /* External definitions for job-shop model. */
 
 #include "simlib.h" /* Required for use of simlib.c. */
+#include <ctype.h>
+#include <unistd.h> 
 
-#define EVENT_ARRIVAL                         \
-  1 /* Event type for arrival of a job to the \
-       system. */
-#define EVENT_DEPARTURE                                                    \
-  2                            /* Event type for departure of a job from a \
-                                  particular station. */
+#define EVENT_ARRIVAL 1 /* Event type for arrival of a job to the system. */
+#define EVENT_DEPARTURE 2 /* Event type for departure of a job from a particular station. */
 #define EVENT_END_SIMULATION 3 /* Event type for end of the simulation. */
 #define STREAM_INTERARRIVAL 1  /* Random-number stream for interarrivals. */
 #define STREAM_JOB_TYPE 2      /* Random-number stream for job types. */
 #define STREAM_SERVICE 3       /* Random-number stream for service times. */
-#define MAX_NUM_STATIONS 5     /* Maximum number of stations. */
-#define MAX_NUM_JOB_TYPES 3    /* Maximum number of job types. */
+// #define MAX_NUM_STATIONS 5     /* Maximum number of stations. */
+// #define MAX_NUM_JOB_TYPES 3    /* Maximum number of job types. */
 
-/* Declare non-simlib global variables. */
+/* Variables Declaration */
 
-int num_stations, num_job_types, i, j, num_machines[MAX_NUM_STATIONS + 1],
-    num_tasks[MAX_NUM_JOB_TYPES + 1],
-    route[MAX_NUM_JOB_TYPES + 1][MAX_NUM_STATIONS + 1],
-    num_machines_busy[MAX_NUM_STATIONS + 1], job_type, task;
-double mean_interarrival, length_simulation, prob_distrib_job_type[26],
-    mean_service[MAX_NUM_JOB_TYPES + 1][MAX_NUM_STATIONS + 1];
+double mean_interarrival, length_simulation;
+
+int num_stations = 3;
+int num_job_types = 2;
+int num_machines[4];
+int num_tasks[3] = {0, 2, 2};
+int route[3][3] = {{0, 0, 0}, {0, 1, 3}, {0, 2, 3}};
+
+int i, j, num_machines_busy[4], job_type, task;
+double prob_distrib_job_type[3] = {0, 0.5, 1.0};
+
+double mean_service[3][4];
 FILE *infile, *outfile;
 
 void arrive(int new_job) /* Function to serve as both an arrival event of a job
@@ -77,9 +87,9 @@ void arrive(int new_job) /* Function to serve as both an arrival event of a job
 
     transfer[3] = job_type;
     transfer[4] = task;
-    event_schedule(
-        sim_time + erlang(2, mean_service[job_type][task], STREAM_SERVICE),
-        EVENT_DEPARTURE);
+    event_schedule(sim_time +
+                       erlang(2, mean_service[job_type][task], STREAM_SERVICE),
+                   EVENT_DEPARTURE);
   }
 }
 
@@ -125,10 +135,10 @@ void depart(void) /* Event function for departure of a job from a particular
 
     transfer[3] = job_type_queue;
     transfer[4] = task_queue;
-    event_schedule(
-        sim_time +
-            erlang(2, mean_service[job_type_queue][task_queue], STREAM_SERVICE),
-        EVENT_DEPARTURE);
+    event_schedule(sim_time + erlang(2,
+                                     mean_service[job_type_queue][task_queue],
+                                     STREAM_SERVICE),
+                   EVENT_DEPARTURE);
   }
 
   /* If the current departing job has one or more tasks yet to be done, send
@@ -173,36 +183,72 @@ void report(void) /* Report generator function. */
             timest(0.0, -j) / num_machines[j], sampst(0.0, -j));
 }
 
-int main() /* Main function. */
+int main(int argc, char *argv[]) /* Main function. */
 {
   /* Open input and output files. */
 
-  infile = fopen("tubes1modsim.in", "r");
-  outfile = fopen("tubes1modsim.out", "w");
+  // infile = fopen("modsim1.in", "r");
+  // outfile = fopen("tubes1modsim.out", "w");
 
+  int opt;
+  char* input_file;
+  char* output_file;
+
+  while ((opt = getopt (argc, argv, "i:o:")) != -1)
+    switch (opt){
+      case 'i':
+        infile = fopen(optarg, "r");
+        break;
+      case 'o':
+        outfile = fopen(optarg, "w+");
+        break;
+      case '?':
+        if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+        else
+          fprintf (stderr,
+                   "Unknown option character `\\x%x'.\n",
+                   optopt);
+        return 1;
+      default:
+        abort ();
+      }
+
+  infile = fopen(input_file, "r");
+  outfile = fopen(output_file, "w+");
+
+  
   /* Read input parameters. */
 
-  fscanf(infile, "%d %d %lg %lg", &num_stations, &num_job_types,
-         &mean_interarrival, &length_simulation);
-  for (j = 1; j <= num_stations; ++j) fscanf(infile, "%d", &num_machines[j]);
-  for (i = 1; i <= num_job_types; ++i) fscanf(infile, "%d", &num_tasks[i]);
+  fscanf(infile, "%lg %lg", &mean_interarrival, &length_simulation);
+  printf("\n\nMean interarrival time of jobs%14.2f hours\n\n",
+         mean_interarrival);
+  printf("Length of the simulation%20.1f eight-hour days\n\n\n",
+         length_simulation);
+  for (j = 1; j <= num_stations; ++j)
+    fscanf(infile, "%d", &num_machines[j]);
+
+  // for (i = 1; i <= num_job_types; ++i) fscanf(infile, "%d", &num_tasks[i]);
+
   for (i = 1; i <= num_job_types; ++i) {
-    for (j = 1; j <= num_tasks[i]; ++j) fscanf(infile, "%d", &route[i][j]);
+    // for (j = 1; j <= num_tasks[i]; ++j) fscanf(infile, "%d", &route[i][j]);
     for (j = 1; j <= num_tasks[i]; ++j)
       fscanf(infile, "%lg", &mean_service[i][j]);
   }
-  for (i = 1; i <= num_job_types; ++i)
-    fscanf(infile, "%lg", &prob_distrib_job_type[i]);
+  // for (i = 1; i <= num_job_types; ++i)
+  //   fscanf(infile, "%lg", &prob_distrib_job_type[i]);
 
   /* Write report heading and input parameters. */
 
-  fprintf(outfile, "Job-shop model\n\n");
+  fprintf(outfile, "Tugas 1 Modsim \n\n");
   fprintf(outfile, "Number of work stations%21d\n\n", num_stations);
   fprintf(outfile, "Number of machines in each station     ");
-  for (j = 1; j <= num_stations; ++j) fprintf(outfile, "%5d", num_machines[j]);
+  for (j = 1; j <= num_stations; ++j)
+    fprintf(outfile, "%5d", num_machines[j]);
   fprintf(outfile, "\n\nNumber of job types%25d\n\n", num_job_types);
   fprintf(outfile, "Number of tasks for each job type      ");
-  for (i = 1; i <= num_job_types; ++i) fprintf(outfile, "%5d", num_tasks[i]);
+  for (i = 1; i <= num_job_types; ++i)
+    fprintf(outfile, "%5d", num_tasks[i]);
   fprintf(outfile, "\n\nDistribution function of job types  ");
   for (i = 1; i <= num_job_types; ++i)
     fprintf(outfile, "%8.3f", prob_distrib_job_type[i]);
@@ -213,7 +259,8 @@ int main() /* Main function. */
   fprintf(outfile, "Job type     Work stations on route");
   for (i = 1; i <= num_job_types; ++i) {
     fprintf(outfile, "\n\n%4d        ", i);
-    for (j = 1; j <= num_tasks[i]; ++j) fprintf(outfile, "%5d", route[i][j]);
+    for (j = 1; j <= num_tasks[i]; ++j)
+      fprintf(outfile, "%5d", route[i][j]);
   }
   fprintf(outfile, "\n\n\nJob type     ");
   fprintf(outfile, "Mean service time (in hours) for successive tasks");
@@ -222,10 +269,12 @@ int main() /* Main function. */
     for (j = 1; j <= num_tasks[i]; ++j)
       fprintf(outfile, "%9.2f", mean_service[i][j]);
   }
+  
 
   /* Initialize all machines in all stations to the idle state. */
 
-  for (j = 1; j <= num_stations; ++j) num_machines_busy[j] = 0;
+  for (j = 1; j <= num_stations; ++j)
+    num_machines_busy[j] = 0;
 
   /* Initialize simlib */
 
@@ -255,15 +304,15 @@ int main() /* Main function. */
     /* Invoke the appropriate event function. */
 
     switch (next_event_type) {
-      case EVENT_ARRIVAL:
-        arrive(1);
-        break;
-      case EVENT_DEPARTURE:
-        depart();
-        break;
-      case EVENT_END_SIMULATION:
-        report();
-        break;
+    case EVENT_ARRIVAL:
+      arrive(1);
+      break;
+    case EVENT_DEPARTURE:
+      depart();
+      break;
+    case EVENT_END_SIMULATION:
+      report();
+      break;
     }
 
     /* If the event just executed was not the end-simulation event (type
@@ -275,7 +324,8 @@ int main() /* Main function. */
   int c;
 
   if (outfile) {
-    while ((c = getc(outfile)) != EOF) putchar(c);
+    while ((c = getc(outfile)) != EOF)
+      putchar(c);
   }
   fclose(infile);
   fclose(outfile);
