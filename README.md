@@ -10,3 +10,10 @@ How to run binary
 ```bash
 ./tubes1modsim -i inputfile -o outputfile
 ```
+
+Input file format
+```bash
+mean_interarrival  length_simulation
+num_machine[1] num_machine[2] num_machine[3]
+mean service[1][1]  mean service[1][2]
+mean service[2][1]  mean service[2][2]
