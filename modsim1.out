@@ -2,7 +2,7 @@ Tugas 1 Modsim
 
 Number of work stations                    3
 
-Number of machines in each station         2    2    2
+Number of machines in each station         2    2    3
 
 Number of job types                        2
 
@@ -10,7 +10,7 @@ Number of tasks for each job type          2    2
 
 Distribution function of job types     0.500   1.000
 
-Mean interarrival time of jobs          0.50 hours
+Mean interarrival time of jobs          0.20 hours
 
 Length of the simulation               365.0 eight-hour days
 
@@ -24,27 +24,27 @@ Job type     Work stations on route
 
 Job type     Mean service time (in hours) for successive tasks
 
-   1         0.30     0.30
+   1         0.30     0.60
 
-   2         0.30     0.30
+   2         0.70     0.20
 
 
 
 Job type     Average total delay in queue
 
-   1                      0.033
+   1                      0.199
 
-   2                      0.033
+   2                      1.734
 
-Overall average job total delay =     0.033
+Overall average job total delay =     0.966
 
 
 
  Work      Average number      Average       Average delay
 station       in queue       utilization        in queue
 
-   1            0.007            0.155            0.007
+   1            0.101            0.379            0.040
 
-   2            0.006            0.148            0.006
+   2            3.921            0.865            1.579
 
-   3            0.054            0.304            0.027
+   3            0.790            0.675            0.157

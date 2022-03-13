@@ -8,7 +8,9 @@ Filbert Wijaya/13518077
 
 #include "simlib.h" /* Required for use of simlib.c. */
 #include <ctype.h>
-#include <unistd.h> 
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define EVENT_ARRIVAL 1 /* Event type for arrival of a job to the system. */
 #define EVENT_DEPARTURE 2 /* Event type for departure of a job from a particular station. */
@@ -183,24 +185,28 @@ void report(void) /* Report generator function. */
             timest(0.0, -j) / num_machines[j], sampst(0.0, -j));
 }
 
-int main(int argc, char *argv[]) /* Main function. */
+int main(int argc, char **argv) /* Main function. */
 {
   /* Open input and output files. */
 
-  // infile = fopen("modsim1.in", "r");
-  // outfile = fopen("tubes1modsim.out", "w");
+  printf ("Tugas 1 Modsim");
+
+  // infile = fopen("1.in", "r");
+  // outfile = fopen("1.out", "w");
 
   int opt;
-  char* input_file;
+  // char* input_file;
   char* output_file;
 
-  while ((opt = getopt (argc, argv, "i:o:")) != -1)
-    switch (opt){
+    while ((opt = getopt (argc, argv, "i:o:")) != -1)
+    switch (opt)
+      {
       case 'i':
         infile = fopen(optarg, "r");
         break;
       case 'o':
         outfile = fopen(optarg, "w+");
+        output_file = optarg;
         break;
       case '?':
         if (isprint (optopt))
@@ -214,8 +220,8 @@ int main(int argc, char *argv[]) /* Main function. */
         abort ();
       }
 
-  infile = fopen(input_file, "r");
-  outfile = fopen(output_file, "w+");
+  // infile = fopen(input_file, "r");
+  // outfile = fopen(output_file, "w+");
 
   
   /* Read input parameters. */
@@ -223,7 +229,7 @@ int main(int argc, char *argv[]) /* Main function. */
   fscanf(infile, "%lg %lg", &mean_interarrival, &length_simulation);
   printf("\n\nMean interarrival time of jobs%14.2f hours\n\n",
          mean_interarrival);
-  printf("Length of the simulation%20.1f eight-hour days\n\n\n",
+  printf("Length of the simulation%20.1f eight-hour days\n\n",
          length_simulation);
   for (j = 1; j <= num_stations; ++j)
     fscanf(infile, "%d", &num_machines[j]);
@@ -323,10 +329,8 @@ int main(int argc, char *argv[]) /* Main function. */
 
   int c;
 
-  if (outfile) {
-    while ((c = getc(outfile)) != EOF)
-      putchar(c);
-  }
+  printf("Report output in %s \nSimulation Done \n", output_file);
+
   fclose(infile);
   fclose(outfile);
 
