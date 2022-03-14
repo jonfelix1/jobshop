@@ -211,12 +211,10 @@ int main(int argc, char **argv) /* Main function. */
     case 'i':
       infile = fopen(optarg, "r");
       input_file = optarg;
-      // printf ("\n%s\n", input_file);
       break;
     case 'o':
       outfile = fopen(optarg, "w+");
       output_file = optarg;
-      // printf ("\n%s\n", output_file);
       break;
     case '?':
       if (isprint (optopt))
@@ -237,33 +235,20 @@ int main(int argc, char **argv) /* Main function. */
   /* Read input parameters. */
 
   fscanf (infile, "%d %d %lg %lg", &num_stations, &num_job_types, &mean_interarrival, &length_simulation);
-  // printf("%d %d %lg %lg\n", num_stations, num_job_types, mean_interarrival, length_simulation);
   for (j = 1; j <= num_stations; ++j){
     fscanf (infile, "%d", &num_machines[j]);
-    // printf ("%d ", num_machines[j]);
   }
-  // printf ("\n");
-  // return 0;
   for (i = 1; i <= num_job_types; ++i){
     fscanf (infile, "%d", &num_tasks[i]);
-    // printf ("%d ", num_tasks[i]);
   }
-  // return 0;
-  // printf ("\n");
   for (i = 1; i <= num_job_types; ++i)
     {
       for (j = 1; j <= num_tasks[i]; ++j){
 	      fscanf (infile, "%d", &route[i][j]);
-        // printf("[%d]", j);
-        // printf ("%d ", route[i][j]);
       }
-      // printf ("\n");
       for (j = 1; j <= num_tasks[i]; ++j){
 	      fscanf (infile, "%lg", &mean_service[i][j]);
-        // printf("[%d]", j);
-        // printf("%lg ", mean_service[i][j]);
       }
-      // printf ("\n");
     }
   for (i = 1; i <= num_job_types; ++i)
     fscanf (infile, "%lg", &prob_distrib_job_type[i]);
