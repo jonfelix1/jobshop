@@ -411,11 +411,11 @@ double sampst(double value, int variable) {
 
   /* If the variable value is improper, stop the simulation. */
 
-  if (!(variable >= -MAX_SVAR) && (variable <= MAX_SVAR)) {
-    printf("\n%d is an improper value for a sampst variable at time %f\n",
-           variable, sim_time);
-    exit(1);
-  }
+  // if (!(variable >= -MAX_SVAR) && (variable <= MAX_SVAR)) {
+  //   printf("\n%d is an improper value for a sampst variable at time %f\n",
+  //          variable, sim_time);
+  //   exit(1);
+  // }
 
   /* Execute the desired option. */
 

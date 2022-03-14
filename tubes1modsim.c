@@ -18,23 +18,32 @@ Filbert Wijaya/13518077
 #define STREAM_INTERARRIVAL 1  /* Random-number stream for interarrivals. */
 #define STREAM_JOB_TYPE 2      /* Random-number stream for job types. */
 #define STREAM_SERVICE 3       /* Random-number stream for service times. */
-// #define MAX_NUM_STATIONS 5     /* Maximum number of stations. */
-// #define MAX_NUM_JOB_TYPES 3    /* Maximum number of job types. */
+#define MAX_NUM_STATIONS 50     /* Maximum number of stations. */
+#define MAX_NUM_JOB_TYPES 50    /* Maximum number of job types. */
 
 /* Variables Declaration */
 
-double mean_interarrival, length_simulation;
+// double mean_interarrival, length_simulation;
 
-int num_stations = 3;
-int num_job_types = 2;
-int num_machines[4];
-int num_tasks[3] = {0, 2, 2};
-int route[3][3] = {{0, 0, 0}, {0, 1, 3}, {0, 2, 3}};
+// int num_stations = 3;
+// int num_job_types = 2;
+// int *num_machines;
+// int num_tasks[3] = {0, 2, 2};
+// int route[3][3] = {{0, 0, 0}, {0, 1, 3}, {0, 2, 3}};
 
-int i, j, num_machines_busy[4], job_type, task;
-double prob_distrib_job_type[3] = {0, 0.5, 1.0};
+// int i, j, num_machines_busy[4], job_type, task;
+// double prob_distrib_job_type[3] = {0, 0.5, 1.0};
 
-double mean_service[3][4];
+// double mean_service[3][4];
+
+int num_stations, num_job_types, i, j, num_machines[MAX_NUM_STATIONS + 1],
+  num_tasks[MAX_NUM_JOB_TYPES + 1],
+  route[MAX_NUM_JOB_TYPES + 1][MAX_NUM_STATIONS + 1], num_machines_busy[MAX_NUM_STATIONS + 1], job_type, task;
+double mean_interarrival, length_simulation, prob_distrib_job_type[26],
+  mean_service[MAX_NUM_JOB_TYPES + 1][MAX_NUM_STATIONS + 1];
+FILE *infile, *outfile;
+
+
 FILE *infile, *outfile;
 
 void arrive(int new_job) /* Function to serve as both an arrival event of a job
@@ -189,60 +198,75 @@ int main(int argc, char **argv) /* Main function. */
 {
   /* Open input and output files. */
 
-  printf ("Tugas 1 Modsim");
+  printf ("Tugas 1 IF4021 Modsim\n\n");
 
-  // infile = fopen("1.in", "r");
-  // outfile = fopen("1.out", "w");
 
   int opt;
-  // char* input_file;
+  char* input_file;
   char* output_file;
 
-    while ((opt = getopt (argc, argv, "i:o:")) != -1)
-    switch (opt)
-      {
-      case 'i':
-        infile = fopen(optarg, "r");
-        break;
-      case 'o':
-        outfile = fopen(optarg, "w+");
-        output_file = optarg;
-        break;
-      case '?':
-        if (isprint (optopt))
-          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-        else
-          fprintf (stderr,
-                   "Unknown option character `\\x%x'.\n",
-                   optopt);
-        return 1;
-      default:
-        abort ();
-      }
-
-  // infile = fopen(input_file, "r");
-  // outfile = fopen(output_file, "w+");
+  while ((opt = getopt (argc, argv, "i:o:")) != -1){
+  switch (opt)
+    {
+    case 'i':
+      infile = fopen(optarg, "r");
+      input_file = optarg;
+      // printf ("\n%s\n", input_file);
+      break;
+    case 'o':
+      outfile = fopen(optarg, "w+");
+      output_file = optarg;
+      // printf ("\n%s\n", output_file);
+      break;
+    case '?':
+      if (isprint (optopt))
+        fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+      else
+        fprintf (stderr,
+                  "Unknown option character `\\x%x'.\n",
+                  optopt);
+      return 1;
+    default:
+      abort();
+    }
+  }
+  // infile = fopen("demo1.in", "r");
+  // outfile = fopen("demo1.out", "w+");
 
   
   /* Read input parameters. */
 
-  fscanf(infile, "%lg %lg", &mean_interarrival, &length_simulation);
-  printf("\n\nMean interarrival time of jobs%14.2f hours\n\n",
-         mean_interarrival);
-  printf("Length of the simulation%20.1f eight-hour days\n\n",
-         length_simulation);
-  for (j = 1; j <= num_stations; ++j)
-    fscanf(infile, "%d", &num_machines[j]);
-
-  // for (i = 1; i <= num_job_types; ++i) fscanf(infile, "%d", &num_tasks[i]);
-
-  for (i = 1; i <= num_job_types; ++i) {
-    // for (j = 1; j <= num_tasks[i]; ++j) fscanf(infile, "%d", &route[i][j]);
-    for (j = 1; j <= num_tasks[i]; ++j)
-      fscanf(infile, "%lg", &mean_service[i][j]);
+  fscanf (infile, "%d %d %lg %lg", &num_stations, &num_job_types, &mean_interarrival, &length_simulation);
+  // printf("%d %d %lg %lg\n", num_stations, num_job_types, mean_interarrival, length_simulation);
+  for (j = 1; j <= num_stations; ++j){
+    fscanf (infile, "%d", &num_machines[j]);
+    // printf ("%d ", num_machines[j]);
   }
-  // for (i = 1; i <= num_job_types; ++i)
-  //   fscanf(infile, "%lg", &prob_distrib_job_type[i]);
+  // printf ("\n");
+  // return 0;
+  for (i = 1; i <= num_job_types; ++i){
+    fscanf (infile, "%d", &num_tasks[i]);
+    // printf ("%d ", num_tasks[i]);
+  }
+  // return 0;
+  // printf ("\n");
+  for (i = 1; i <= num_job_types; ++i)
+    {
+      for (j = 1; j <= num_tasks[i]; ++j){
+	      fscanf (infile, "%d", &route[i][j]);
+        // printf("[%d]", j);
+        // printf ("%d ", route[i][j]);
+      }
+      // printf ("\n");
+      for (j = 1; j <= num_tasks[i]; ++j){
+	      fscanf (infile, "%lg", &mean_service[i][j]);
+        // printf("[%d]", j);
+        // printf("%lg ", mean_service[i][j]);
+      }
+      // printf ("\n");
+    }
+  for (i = 1; i <= num_job_types; ++i)
+    fscanf (infile, "%lg", &prob_distrib_job_type[i]);
 
   /* Write report heading and input parameters. */
 
@@ -301,6 +325,8 @@ int main(int argc, char **argv) /* Main function. */
 
   /* Run the simulation until it terminates after an end-simulation event
      (type EVENT_END_SIMULATION) occurs. */
+
+  printf("Running Simulation\n\n");
 
   do {
     /* Determine the next event. */
